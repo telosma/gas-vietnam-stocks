@@ -1,5 +1,5 @@
 const CONFIG_SHEET = 'configs'
-const MAIL_SUBJECT = 'test'
+const MAIL_SUBJECT = 'VN_STOCK ALERT'
 const PRICE_UNIT = 1000
 const PRICE_CURRENCY = 'VND'
 var Config = {}
