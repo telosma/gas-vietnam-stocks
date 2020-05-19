@@ -8,10 +8,10 @@ function run() {
   loadConfig()
   let msg = setDataGoogleSheet()
   let currentHour = new Date().getHours()
-  //if (9 < currentHour && currentHour < 18 && Config.enableSendMail) {
+  if (9 < currentHour && currentHour < 18 && Config.enableSendMail) {
     let htmlBody = "<h2>Hi, our stock's prices has been changed!</h2>" + msg
     sendMail(htmlBody)
-  //}
+  }
 }
 
 function main() {
