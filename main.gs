@@ -1,17 +1,27 @@
 const CONFIG_SHEET = 'configs'
 const MAIL_SUBJECT = 'test'
 const PRICE_UNIT = 1000
-const PRICE_CURRENCY = "VND"
+const PRICE_CURRENCY = 'VND'
 var Config = {}
 
 function run() {
   loadConfig()
-  let msg = getAllPrices()
+  let msg = setDataGoogleSheet()
   let currentHour = new Date().getHours()
-  if (9 < currentHour && currentHour < 18 && Config.enableSendMail) {
+  //if (9 < currentHour && currentHour < 18 && Config.enableSendMail) {
     let htmlBody = "<h2>Hi, our stock's prices has been changed!</h2>" + msg
     sendMail(htmlBody)
-  }
+  //}
+}
+
+function main() {
+  run();
+  SpreadsheetApp.getUi()
+  .createMenu('Stock Utils')
+  .addItem('Refresh', 'setDataGoogleSheet')
+  .addItem('Enable send mail','enableSendMail')
+  .addItem('Disable send mail','disableSendMail')
+  .addToUi();
 }
 
 function loadConfig() {
@@ -28,14 +38,14 @@ function loadConfig() {
   Logger.log(Config)
 }
 
-function getStockPrice(symbols) {
-  const response = UrlFetchApp.fetch("https://priceservice.vndirect.com.vn/priceservice/secinfo/snapshot/q=codes:" + symbols)
+function getStockdata(symbols) {
+  const response = UrlFetchApp.fetch('https://priceservice.vndirect.com.vn/priceservice/secinfo/snapshot/q=codes:' + symbols)
   const json = response.getContentText()
   const data = JSON.parse(json)
 
   const stockData = data.reduce(
     (accumulator, d) => {
-      const arrStock = d.split("|")
+      const arrStock = d.split('|')
       accumulator[arrStock[3]] = {
         price: arrStock[19],
         r_price: arrStock[8],
@@ -52,9 +62,9 @@ function getStockPrice(symbols) {
 }
 
 
-function getAllPrices() {
-  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("stocks")
-  var symbols = sheet.getRange("A3:A10").getValues()
+function setDataGoogleSheet() {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('stocks')
+  var symbols = sheet.getRange('A3:A10').getValues()
   symbols = symbols.filter(function(s) {
     return s[0].length > 0
   }).map(function(s) {
@@ -63,9 +73,9 @@ function getAllPrices() {
 
   Logger.log(symbols)
 
-  const stocks = getStockPrice(symbols)
+  const stocks = getStockdata(symbols)
   let startRow = 3
-  let message = ""
+  let message = ''
   for (let idx = 0; idx < symbols.length; idx++) {
     let code = symbols[idx]
     if (!stocks[code]) continue
@@ -113,31 +123,24 @@ function getAllPrices() {
     foreignBuyRange.setValue(curStock['f_buy_volume'])
     foreignSellRange.setValue(curStock['f_sell_volume'])
   }
-  sheet.getRange(1, 1, 1, 1).setValue("Last update: " + new Date().toLocaleString('vn-VI', { timeZone: 'Asia/Ho_Chi_Minh' }))
+  sheet.getRange(1, 1, 1, 1).setValue('Last update: ' + new Date().toLocaleString('vn-VI', { timeZone: 'Asia/Ho_Chi_Minh' }))
   return message;
 }
   
 function makeLossFontTag(con) {
-   return `<strong style="color:red">${con}</strong>`
+   return `<strong style='color:red'>${con}</strong>`
 }
 
 function makeProfitFontTag(con) {
-   return `<strong style="color:green">${con}</strong>`
+   return `<strong style='color:green'>${con}</strong>`
 }
 /**
  * Google trigger function. When the sheet is opened, a custom menu is produced.
  * 
  */
 
- 
 function onOpen() {
-  getAllPrices();
-  SpreadsheetApp.getUi()
-  .createMenu('Stock Utils')
-  .addItem('Refresh', 'getAllPrices')
-  .addItem("Enable send mail","enableSendMail")
-  .addItem("Disable send mail","disableSendMail")
-  .addToUi();
+  main()
 }
 
 function enableSendMail() {

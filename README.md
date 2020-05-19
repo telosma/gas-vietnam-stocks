@@ -17,5 +17,5 @@ Simple Google Apps Script to get Vietnamese Stock information such as *price*, *
 - Whatever you want with your stock data.
 
 ## Current features
-- Reload stock price intervally
+- Reload stock price periodically
 - Send mail to receivers when prices change
